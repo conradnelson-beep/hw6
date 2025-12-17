@@ -5,12 +5,14 @@
 #include <cmath>
 #include <random>
 #include <chrono>
+#include <ctime>
+#include <cstdlib>
 
 typedef std::size_t HASH_INDEX_T;
 
 struct MyStringHash {
     HASH_INDEX_T rValues[5] { 983132572, 1468777056, 552714139, 984953261, 261934300 };
-    MyStringHash(bool debug = true)
+    MyStringHash(bool debug = true) // changed from true
     {
         if(false == debug){
             generateRValues();
@@ -20,15 +22,44 @@ struct MyStringHash {
     HASH_INDEX_T operator()(const std::string& k) const
     {
         // Add your code here
+      std::vector<unsigned long long> w(5,0);
+      int block_index = 4; // 5-1
+      int size = k.size(); 
 
+      for (int i = size; i > 0 && block_index >=0; i = i - 6, block_index--) {
+        unsigned long long aval = 0;
 
+        for(int j = 0; j < 6; j++) {
+          int id = i - 6 + j;
+          int b = 0;
+
+          if(id >= 0) {
+            b = letterDigitToNumber(k[id]);
+            aval = aval*36 + b;
+          }
+
+          
+        }
+        w[block_index] = aval;
+      }
+       HASH_INDEX_T hash_val = 0;
+       
+       for(int n = 0; n < 5; n++) {
+         hash_val += rValues[n] * w[n];
+       }
+      return hash_val;
     }
 
     // A likely helper function is to convert a-z,0-9 to an integral value 0-35
     HASH_INDEX_T letterDigitToNumber(char letter) const
     {
         // Add code here or delete this helper function if you do not want it
-
+        if(letter >= 'a' && letter <= 'z') {
+          return letter - 'a';
+        }
+        else {
+          return (letter - '0') + 26;
+        }
     }
 
     // Code to generate the random R values
